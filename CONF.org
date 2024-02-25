@@ -1,0 +1,258 @@
+* Flake
+This is the file that provide a way to define and compose Nix packages and configurations in a declarative and reproducible manner
+#+begin_src nix :tangle flake.nix
+  {
+    description = "THE NAME IS PRIMEANIX";
+
+    inputs = {
+      nixpkgs.url = "github:nixos/nixpkgs/23.11";
+      home-manager = {
+        url = "github:nix-community/home-manager";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+    };
+    outputs = {nixpkgs, home-manager, ...}:
+      let
+        system = "x86_64-linux";
+        pkgs = nixpkgs.legacyPackages.${system};
+      in {
+        homeConfigurations = {
+          "theprimeagen" = home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            modules = [
+              ./home
+            ];
+          };
+        };
+      };
+  }
+#+end_src
+1. Inputs: An input is a reference to another flake or a Nix expression that provides a set of packages or configurations used by the current flake. Inputs are declared in the flake file and can be either local paths or URLs.
+2. Outputs: An output is a target produced by the flake, such as a package or a configuration. Flakes can have multiple outputs, each with its own name and type ( defaultPackage, packages, modules).
+* Home
+The Home file is the Configuration of Home-Manager which is a nix based solution to manage your dotfiles, environment variables, packages, even your user
+#+begin_src nix :tangle ./home/default.nix
+   { inputs, outputs, lib, config, pkgs, ... }: {
+     imports = [
+       ./awsomewm.nix
+       ./i3.nix
+       ./i3status.nix
+       #./netflix.nix
+       ./nvim.nix
+       #./personal.nix
+       #./sway.nix
+       ./tmux.nix
+       #./tree-sitter.nix
+       ./xkb.nix
+       ./zsh.nix
+     ];
+     # Enable home-manager and git
+     programs.home-manager.enable = true;
+     programs.git.enable = true;
+     home = {
+       enableNixpkgsReleaseCheck = false;
+       username = "theprimeagen";
+       homeDirectory = "/home/theprimeagen";
+       stateVersion = "23.11";
+       packages = with pkgs; [
+         # Add Your Needed Packages here
+       ];
+     };
+     systemd.user.startServices = "sd-switch";
+     }
+
+#+end_src
+** AwsomeWm
+#+begin_src nix :tangle ./home/awsomewm.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    xsession.windowManager.awesome.enable = true;
+    home.file."awesome" = {
+      enable = true;
+      source = ./configs/awesomewm;
+      target = "~/.config/awesome";
+    };
+  }
+#+end_src
+** i3
+*** i3 Windows Manager
+#+begin_src nix :tangle ./home/i3.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    xsession.windowManager.i3.enable = true;
+    home.file."i3" = {
+      enable = true;
+      source = ./configs/i3wm;
+      target = "~/.config/i3";
+    };
+  }
+#+end_src
+*** i3 Status
+#+begin_src nix :tangle ./home/i3status.nix
+    { inputs, outputs, lib, config, pkgs, ... }: {
+      programs.i3status.enable = true;
+      home.file."i3status" = {
+        enable = true;
+        source = ./configs/i3status;
+        target = "~/.config/i3status";
+      };
+    }
+#+end_src
+** nvim
+#+begin_src nix :tangle ./home/nvim.nix
+    { inputs, outputs, lib, config, pkgs, ... }:
+      let
+        toLua = str: "lua << EOF\n${str}\nEOF\n";
+      in {
+        programs.neovim = {
+          enable = true;
+          plugins = with pkgs.vimPlugins; [
+            nvim-treesitter
+            playground
+            harpoon
+            refactoring-nvim
+            undotree
+            vim-fugitive
+            nvim-treesitter-context
+            zen-mode-nvim
+            copilot-vim
+            lsp-zero-nvim
+            nvim-lspconfig
+            mason-nvim
+            mason-lspconfig-nvim
+            cmp-buffer
+            cmp-path
+            cmp-nvim-lsp
+            cmp-nvim-lua
+            luasnip
+            friendly-snippets
+            cmp_luasnip
+            nvim-cmp
+            telescope-nvim
+            plenary-nvim
+            {plugin = trouble-nvim; config = toLua "function() require(\"trouble\").setup {icons = false,} end ";  }
+            {plugin = rose-pine; config = toLua ''require('rose-pine').setup {variant = 'main',} vim.cmd 'colorscheme rose-pine' local lualine_theme = require('lualine.themes.rose-pine') '';}
+          ];
+      };
+      home.file."nvim" = {
+        enable = true;
+        source = ./configs/nvim;
+        target = "~/.config/nvim";
+      };
+    }
+#+end_src
+* Tmux
+#+begin_src nix :tangle ./home/tmux.nix
+
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    programs.tmux = {
+      enable = true;
+    };
+      home.file."tmux" = {
+      enable = true;
+      source = ./configs/tmux;
+      target = "~/.config/tmux";
+    };
+  }
+#+end_src
+** Tree Sitter
+#+begin_src nix :tangle ./home/tree-sitter.nix
+  { inputs, outputs, fetchFromGitHub , lib, config, pkgs, ... }: {
+    home = {
+      packages = [ pkgs.tree-sitter ];
+      file."tree-sitter" = {
+        enable = true;
+        source = ./configs/tree-sitter;
+        target = "~/.config/tree-sitter";
+      };
+
+      file."tree-sitter-lua" = {
+        enable = true;
+        source = fetchFromGitHub {
+          owner = "Azganoth";
+          repo = "tree-sitter-lua";
+          rev = "v2.1.3";
+          sha256 = "0000000000000000000000000000000000000000000000000000";
+        } ;
+        target = "~/.config/tree-sitter/tree-sitter-lua";
+      };
+    };
+  }
+#+end_src
+** Zsh
+#+begin_src nix :tangle ./home/zsh.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    programs.zsh = {
+      enable = true;
+      oh-my-zsh = {
+        enable = true;
+        plugins = [ "git" ];
+        theme =  "robbyrussell";
+      };
+    };
+    home = {
+      file."zsh" = {
+        enable = true;
+        source = ./configs/zsh;
+        target = "~/.config/zsh";
+      };
+    };
+  }
+#+end_src
+** Netflix
+#+begin_src nix :tangle ./home/netflix.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    home = {
+      file."netflix" = {
+        enable = true;
+        source = fetchFromGitHub {
+          owner = "ThePrimeagen";
+          repo = ".dotfiles-netflix";
+          sha256 = "0000000000000000000000000000000000000000000000000000";
+        } ;
+        target = "~/netflix";
+      };
+    };
+  }
+#+end_src
+** Personal
+#+begin_src nix :tangle ./home/personal.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    home = {
+      file."personal" = {
+        enable = true;
+        source = fetchFromGitHub {
+          owner = "ThePrimeagen";
+          repo = ".dotfiles-personal";
+          sha256 = "0000000000000000000000000000000000000000000000000000";
+        } ;
+        target = "~/personal";
+      };
+    };
+  }
+#+end_src
+** Keyboard
+#+begin_src nix :tangle ./home/xkb.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    home = {
+      file."xkb" = {
+        enable = true;
+        source = ./configs/xkb;
+        target = "~/.config/xkb";
+      };
+    };
+  }
+#+end_src
+** Sway
+#+begin_src nix :tangle ./home/sway.nix
+  { inputs, outputs, lib, config, pkgs, ... }: {
+    wayland.windowManager.sway = {
+      enable = true;
+    };
+      home = {
+      file."sway" = {
+        enable = true;
+        source = ./configs/sway;
+        target = "~/.config/sway";
+      };
+    };
+  }
+#+end_src

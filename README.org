@@ -1,0 +1,71 @@
+#+STARTUP: inlineimages
+* ThePrimeanix
+ This is a simple standalone Nix+Home-manager configuration made for the one and only [[https://twitter.com/ThePrimeagen][ThePrimeagen]] AKA TheStartup Daddy
+** This Message Goes Out To ThePrimeagen
+Hey Prime
+I recently watched your video on [[https://youtu.be/T58Yr5igNGk?si=_it33Xl8LRsrdd72][Nix and NeoVim]] where you mentioned your intresst in nix . Soo I decided to create this project and make it public on GitHub. Your content has been a great source of inspiration for me, and I wanted to thank you for sharing your knowledge and passion with the community. Keep up the fantastic work!
+[[./assets/meme.jpeg]]
+If you need anything just create an issue and i will answer as soon as possible
+** How to Use it
+1. Well First You need nix
+#+begin_src sh
+  sh <(curl -L https://nixos.org/nix/install) --daemon
+#+end_src
+2. Now use your configuration
+#+begin_src sh
+  nix run home-manager/release-23.11 -- switch --flake haam-z/theprimeanix#theprimeagen
+#+end_src
+3. Tinker with Your configration
+   just clone the repo and modify the source files and when you wanna try that config you can run
+#+begin_src sh
+  home-manager switch  --flake .#theprimeagen
+#+end_src
+   Now Congratulation you're using Nix
+ *BTW THIS FILE CONF.org EXPLAIN THE  CONFIGURATIONS*
+** TODO
+1. [ ] Setting up templates from nix to make development experience better
+2. [ ] Keep it as close to [[https://github.com/ThePrimeagen/.dotfiles/tree/master][.dotfiles]] as possible
+   1. Setup all Configuration
+      1. [X] Awsomewm
+      2. [X] i3
+      3. [X] nvim
+      4. [X] tmux
+      5. [ ] tree-sitter
+      6. [X] zsh
+      7. [ ] Netflix
+      8. [ ] Personal
+      9. [X] Keyboard
+    2. Setup all Scripts
+      1. [ ] artist-12
+      2. [ ] flamegraph.pl
+      3. [ ] jedi-language-server
+      4. [ ] nodeenv
+      5. [ ] nrdp
+      6. [ ] proj.json
+      7. [ ] projector
+      8. [ ] pudb3
+      9. [ ] screenkey
+      10. [ ] stackcollapse-perf.pl
+      11. [ ] tmux-cht.sh
+      12. [ ] tmux-nrdp
+      13. [ ] tmux-sessionizer
+      14. [ ] tmux-tvui
+      15. [ ] tmux-windowizer
+      16. [ ] typer
+      17. [ ] xrandr-oh-shit
+3. [X] DONT BRING BAD CHILDHOOD MEMORIES
+4. [X] Limit Nix to only managment not configuration
+5. [ ] Setup Cross System generation
+6. [ ] NO F---ING DOUBLE TRANSLATIONS
+7. [X] Setup a wayland desktop ([[https://github.com/swaywm/sway][Sway]])
+This is something i will add if you dont wanna use it just deleate the file ./home/sway.nix and its configuration in ./home/configs/sway and this line in ./home/default.nix
+#+begin_src nix
+  imports = [
+    ./home/sway.nix
+  ];
+#+end_src
+8. [ ] keep it as pure as possible
+** License
+ This repo is a simply made for fun soo its licensed under the beerware License, Simply if we meet one day and you think
+ this work deserved it you can Buy Me a beer
+ See the [[./LICENSE][LICENSE]] file for the full text of the Beerware License.
